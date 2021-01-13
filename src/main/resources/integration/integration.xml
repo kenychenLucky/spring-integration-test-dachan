@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:file="http://www.springframework.org/schema/integration/file"
+	xmlns:feed="http://www.springframework.org/schema/integration/feed"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration/feed https://www.springframework.org/schema/integration/feed/spring-integration-feed.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration/file https://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+		http://www.springframework.org/schema/integration https://www.springframework.org/schema/integration/spring-integration.xsd">
+
+    <feed:inbound-channel-adapter id="news" url="https://spring.io/blog.atom" auto-startup="${auto.startup:true}">
+        <int:poller fixed-rate="5000"/>
+    </feed:inbound-channel-adapter>
+
+    <int:transformer
+            input-channel="news"
+            expression="payload.title + ' @ ' + payload.link + '#{systemProperties['line.separator']}'"
+            output-channel="file"/>
+    <!-- 定义通道 -->
+    <int:channel id="file-channel"/>
+
+<!--    &lt;!&ndash; 文件类型-输入通道适配器 &ndash;&gt;-->
+<!--    <file:inbound-channel-adapter-->
+<!--            directory="D:/work/gs-integration/complete/input" channel="file-channel">-->
+<!--        <int:poller fixed-rate="1000"/>-->
+<!--    </file:inbound-channel-adapter>-->
+
+
+
+
+    <file:outbound-channel-adapter id="file"
+            mode="APPEND"
+            charset="UTF-8"
+            directory="/tmp/ai_keny"
+            filename-generator-expression="'${feed.file.name:SpringBlog}'"/>
+
+</beans>
